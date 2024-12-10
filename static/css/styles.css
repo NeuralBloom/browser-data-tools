@@ -1,329 +1,247 @@
 /* static/css/styles.css */
 
-/**
- * Table of Contents:
- * 1. Root Variables
- * 2. Base Styles
- * 3. Layout Components
- * 4. UI Components
- * 5. Data Visualization
- * 6. Animations
- * 7. Utilities
- * 8. Dark Mode
- * 9. Media Queries
- */
-
-/* 1. Root Variables
-   ========================================================================== */
+/* Base Styles */
 :root {
-    /* Colors */
-    --color-primary: #2563eb;
-    --color-primary-light: #60a5fa;
-    --color-primary-dark: #1d4ed8;
-    --color-success: #10b981;
-    --color-warning: #f59e0b;
-    --color-error: #ef4444;
-    --color-text: #1f2937;
-    --color-text-light: #6b7280;
-    --color-background: #ffffff;
-    --color-border: #e5e7eb;
-    
-    /* Spacing */
-    --spacing-xs: 0.25rem;
-    --spacing-sm: 0.5rem;
-    --spacing-md: 1rem;
-    --spacing-lg: 1.5rem;
-    --spacing-xl: 2rem;
-    
-    /* Shadows */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    
-    /* Transitions */
-    --transition-fast: 150ms ease;
-    --transition-normal: 300ms ease;
-    --transition-slow: 500ms ease;
+    --primary-color: #2563eb;
+    --secondary-color: #64748b;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --error-color: #ef4444;
+    --background-color: #ffffff;
+    --text-color: #1f2937;
+    --border-color: #e5e7eb;
+    --hover-color: #f3f4f6;
 }
 
-/* 2. Base Styles
-   ========================================================================== */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     line-height: 1.5;
-    color: var(--color-text);
-    background-color: var(--color-background);
+    color: var(--text-color);
+    background-color: #f3f4f6;
 }
 
-/* 3. Layout Components
-   ========================================================================== */
+/* Layout */
 .container {
-    width: 100%;
-    max-width: 1280px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 0 var(--spacing-md);
+    padding: 0 1rem;
 }
 
-.card {
-    background: var(--color-background);
-    border-radius: 0.5rem;
-    box-shadow: var(--shadow-md);
-    transition: transform var(--transition-fast);
+/* Navigation */
+.main-nav {
+    background-color: var(--background-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1rem 0;
+    margin-bottom: 2rem;
 }
 
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-}
-
-/* 4. UI Components
-   ========================================================================== */
-/* Buttons */
-.button {
-    display: inline-flex;
+.nav-content {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    padding: 0.5rem 1rem;
-    border-radius: 0.375rem;
+}
+
+.nav-brand h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-link {
+    color: var(--secondary-color);
+    text-decoration: none;
     font-weight: 500;
-    transition: all var(--transition-fast);
-    cursor: pointer;
+    padding: 0.5rem 0;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
 }
 
-.button-primary {
-    background-color: var(--color-primary);
-    color: white;
+.nav-link:hover {
+    color: var(--primary-color);
 }
 
-.button-primary:hover {
-    background-color: var(--color-primary-dark);
+.nav-link.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+/* Tool Card */
+.tool-card {
+    background-color: var(--background-color);
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.tool-title {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
 }
 
 /* File Upload */
+.file-upload-container {
+    margin-bottom: 2rem;
+}
+
 .file-drop-zone {
-    border: 2px dashed var(--color-border);
-    border-radius: 0.5rem;
-    padding: var(--spacing-xl);
-    text-align: center;
-    transition: all var(--transition-normal);
-    cursor: pointer;
-}
-
-.file-drop-zone:hover,
-.file-drop-zone.drag-over {
-    border-color: var(--color-primary);
-    background-color: rgba(37, 99, 235, 0.05);
-}
-
-/* Tool Cards */
-.tool-card {
     display: flex;
     flex-direction: column;
-    padding: var(--spacing-lg);
-    border-radius: 0.5rem;
-    background: var(--color-background);
-    box-shadow: var(--shadow-md);
-    transition: all var(--transition-normal);
-}
-
-.tool-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-}
-
-/* 5. Data Visualization
-   ========================================================================== */
-/* Tables */
-.data-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    border-radius: 0.5rem;
-    overflow: hidden;
-}
-
-.data-table th {
-    background: #f9fafb;
-    padding: var(--spacing-md);
-    font-weight: 600;
-    text-align: left;
-    border-bottom: 2px solid var(--color-border);
-}
-
-.data-table td {
-    padding: var(--spacing-md);
-    border-bottom: 1px solid var(--color-border);
-}
-
-.data-table tbody tr:hover {
-    background-color: rgba(37, 99, 235, 0.05);
-}
-
-/* Charts */
-.chart-container {
-    position: relative;
-    padding: var(--spacing-md);
-    background: var(--color-background);
-    border-radius: 0.5rem;
-    box-shadow: var(--shadow-sm);
-}
-
-.chart-legend {
-    display: flex;
-    gap: var(--spacing-md);
-    padding: var(--spacing-sm);
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-/* 6. Animations
-   ========================================================================== */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideUp {
-    from { 
-        transform: translateY(20px);
-        opacity: 0;
-    }
-    to { 
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-.fade-in {
-    animation: fadeIn var(--transition-normal);
-}
-
-.slide-up {
-    animation: slideUp var(--transition-normal);
-}
-
-/* 7. Utilities
-   ========================================================================== */
-/* Loading States */
-.loading-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.9);
-    display: flex;
     align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(4px);
+    padding: 2rem;
+    border: 2px dashed var(--border-color);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-.loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid var(--color-border);
-    border-top-color: var(--color-primary);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+.file-drop-zone:hover {
+    border-color: var(--primary-color);
+    background-color: var(--hover-color);
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
+.upload-icon {
+    width: 2rem;
+    height: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
 }
 
-/* Messages */
-.message {
-    padding: var(--spacing-md);
+.upload-text {
+    font-size: 1rem;
+    color: var(--secondary-color);
+}
+
+.file-input {
+    display: none;
+}
+
+/* Results Container */
+.results-container {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.results-container.hidden {
+    display: none;
+    opacity: 0;
+}
+
+/* Summary Section */
+.summary-section,
+.details-section {
+    background-color: var(--background-color);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    margin: 0 0 1rem 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+/* Stat Cards */
+.stat-card {
+    background-color: var(--hover-color);
     border-radius: 0.375rem;
-    margin-bottom: var(--spacing-md);
+    padding: 1rem;
 }
 
-.message-success {
-    background-color: rgba(16, 185, 129, 0.1);
-    border-left: 4px solid var(--color-success);
+.stat-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    font-weight: 600;
 }
 
-.message-error {
-    background-color: rgba(239, 68, 68, 0.1);
-    border-left: 4px solid var(--color-error);
+.stat-info {
+    margin: 0.25rem 0;
+    font-size: 0.875rem;
+    color: var(--secondary-color);
 }
 
-/* 8. Dark Mode
-   ========================================================================== */
+/* Column Details */
+.column-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.details-card {
+    background-color: var(--hover-color);
+    border-radius: 0.375rem;
+    padding: 1rem;
+}
+
+.details-title {
+    margin: 0 0 0.75rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+}
+
+.stat-detail {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--secondary-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .nav-content {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .summary-grid,
+    .column-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark Mode */
 @media (prefers-color-scheme: dark) {
     :root {
-        --color-background: #1f2937;
-        --color-text: #f9fafb;
-        --color-text-light: #d1d5db;
-        --color-border: #374151;
-    }
-
-    .data-table th {
-        background: #374151;
-    }
-
-    .card,
-    .tool-card,
-    .chart-container {
-        background: #2a3441;
-    }
-
-    .file-drop-zone:hover,
-    .file-drop-zone.drag-over {
-        background-color: rgba(96, 165, 250, 0.1);
-    }
-
-    .loading-overlay {
-        background: rgba(31, 41, 55, 0.9);
-    }
-}
-
-/* 9. Media Queries
-   ========================================================================== */
-/* Mobile Devices */
-@media (max-width: 640px) {
-    .container {
-        padding: 0 var(--spacing-sm);
-    }
-
-    .tool-card {
-        margin-bottom: var(--spacing-md);
-    }
-
-    .chart-container {
-        overflow-x: auto;
-    }
-
-    .data-table {
-        font-size: 0.875rem;
-    }
-}
-
-/* Print Styles */
-@media print {
-    .no-print {
-        display: none;
-    }
-
-    .card,
-    .tool-card,
-    .chart-container {
-        box-shadow: none;
-        border: 1px solid var(--color-border);
+        --background-color: #1f2937;
+        --text-color: #f9fafb;
+        --border-color: #374151;
+        --hover-color: #2d3748;
+        --secondary-color: #9ca3af;
     }
 
     body {
-        color: #000;
-        background: #fff;
+        background-color: #111827;
     }
-}
 
-/* High Contrast Mode */
-@media (forced-colors: active) {
-    .button,
-    .file-drop-zone,
-    .tool-card {
-        border: 2px solid currentColor;
+    .stat-card,
+    .details-card {
+        background-color: #2d3748;
     }
 }
