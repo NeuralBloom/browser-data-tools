@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser-Based Data Analysis Tools</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <h1 class="text-xl font-bold">Data Analysis Tools</h1>
+                    </div>
+                    <div class="hidden md:ml-6 md:flex md:space-x-8">
+                        <a href="#" class="inline-flex items-center px-1 pt-1 border-b-2 border-indigo-500 text-sm font-medium text-gray-900">
+                            CSV Analyzer
+                        </a>
+                        <a href="#" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            JSON Explorer
+                        </a>
+                        <a href="#" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            Time Series
+                        </a>
+                        <a href="#" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            Statistics
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div id="csv-analyzer" class="bg-white shadow sm:rounded-lg p-6">
+            <h2 class="text-lg font-medium mb-4">CSV Analyzer</h2>
+            <div class="space-y-4">
+                <div class="flex items-center justify-center w-full">
+                    <label class="flex flex-col items-center px-4 py-6 bg-white text-gray-500 rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-gray-50 hover:border-gray-300">
+                        <svg class="w-8 h-8" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z" />
+                        </svg>
+                        <span class="mt-2 text-base leading-normal">Select a CSV file</span>
+                        <input type='file' class="hidden" accept=".csv" id="csvInput" />
+                    </label>
+                </div>
+                <div id="results" class="hidden">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium mb-2">Summary Statistics</h3>
+                        <div id="summary" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <h3 class="text-lg font-medium mb-2">Column Details</h3>
+                        <div id="columnDetails" class="space-y-4">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('csvInput').addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const text = await file.text();
+            const results = Papa.parse(text, {
+                header: true,
+                dynamicTyping: true,
+                skipEmptyLines: true
+            });
+
+            const summary = analyzeCSV(results.data);
+            displayResults(summary);
+        });
+
+        function analyzeCSV(data) {
+            const summary = {};
+            const columns = Object.keys(data[0]);
+
+            columns.forEach(column => {
+                const values = data.map(row => row[column]).filter(val => val != null);
+                const type = typeof values[0];
+
+                summary[column] = {
+                    type,
+                    unique: new Set(values).size,
+                    missing: data.length - values.length,
+                    ...(type === 'number' ? getNumericStats(values) : getTextStats(values))
+                };
+            });
+
+            return summary;
+        }
+
+        function getNumericStats(values) {
+            const sorted = [...values].sort((a, b) => a - b);
+            return {
+                min: Math.min(...values),
+                max: Math.max(...values),
+                mean: values.reduce((a, b) => a + b, 0) / values.length,
+                median: sorted[Math.floor(sorted.length / 2)]
+            };
+        }
+
+        function getTextStats(values) {
+            return {
+                minLength: Math.min(...values.map(v => String(v).length)),
+                maxLength: Math.max(...values.map(v => String(v).length)),
+                mostCommon: getMostCommon(values)
+            };
+        }
+
+        function getMostCommon(values) {
+            const counts = values.reduce((acc, val) => {
+                acc[val] = (acc[val] || 0) + 1;
+                return acc;
+            }, {});
+            return Object.entries(counts)
+                .sort((a, b) => b[1] - a[1])[0][0];
+        }
+
+        function displayResults(summary) {
+            const resultsDiv = document.getElementById('results');
+            const summaryDiv = document.getElementById('summary');
+            const columnDetailsDiv = document.getElementById('columnDetails');
+
+            resultsDiv.classList.remove('hidden');
+            summaryDiv.innerHTML = '';
+            columnDetailsDiv.innerHTML = '';
+
+            Object.entries(summary).forEach(([column, stats]) => {
+                // Add summary card
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-lg shadow';
+                card.innerHTML = `
+                    <h4 class="font-medium text-gray-900">${column}</h4>
+                    <p class="text-sm text-gray-500">Type: ${stats.type}</p>
+                    <p class="text-sm text-gray-500">Unique Values: ${stats.unique}</p>
+                    <p class="text-sm text-gray-500">Missing: ${stats.missing}</p>
+                `;
+                summaryDiv.appendChild(card);
+
+                // Add detailed stats
+                const details = document.createElement('div');
+                details.className = 'bg-white p-4 rounded-lg shadow';
+                let statsHTML = `<h4 class="font-medium text-gray-900 mb-2">${column}</h4>`;
+                
+                if (stats.type === 'number') {
+                    statsHTML += `
+                        <div class="grid grid-cols-2 gap-2">
+                            <p class="text-sm text-gray-500">Min: ${stats.min}</p>
+                            <p class="text-sm text-gray-500">Max: ${stats.max}</p>
+                            <p class="text-sm text-gray-500">Mean: ${stats.mean.toFixed(2)}</p>
+                            <p class="text-sm text-gray-500">Median: ${stats.median}</p>
+                        </div>
+                    `;
+                } else {
+                    statsHTML += `
+                        <div class="grid grid-cols-2 gap-2">
+                            <p class="text-sm text-gray-500">Min Length: ${stats.minLength}</p>
+                            <p class="text-sm text-gray-500">Max Length: ${stats.maxLength}</p>
+                            <p class="text-sm text-gray-500">Most Common: ${stats.mostCommon}</p>
+                        </div>
+                    `;
+                }
+                details.innerHTML = statsHTML;
+                columnDetailsDiv.appendChild(details);
+            });
+        }
+    </script>
+</body>
+</html>
