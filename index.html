@@ -15,152 +15,158 @@
                     <h1>Data Analysis Tools</h1>
                 </div>
                 <div class="nav-links">
-                    <a href="#" class="nav-link active">CSV Analyzer</a>
-                    <a href="#" class="nav-link">JSON Explorer</a>
-                    <a href="#" class="nav-link">Time Series</a>
-                    <a href="#" class="nav-link">Statistics</a>
+                    <a href="#" class="nav-link" data-tool="csv">CSV Analyzer</a>
+                    <a href="#" class="nav-link" data-tool="json">JSON Explorer</a>
+                    <a href="#" class="nav-link" data-tool="timeseries">Time Series</a>
                 </div>
             </div>
         </div>
     </nav>
 
     <main class="container">
-        <div id="csv-analyzer" class="tool-card">
-            <h2 class="tool-title">CSV Analyzer</h2>
-            <div class="tool-content">
-                <div class="file-upload-container">
-                    <label class="file-drop-zone">
-                        <svg class="upload-icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                            <path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z" />
-                        </svg>
-                        <span class="upload-text">Select a CSV file</span>
-                        <input type='file' class="file-input" accept=".csv" id="csvInput" />
-                    </label>
-                </div>
-                <div id="results" class="results-container hidden">
-                    <div class="summary-section">
-                        <h3 class="section-title">Summary Statistics</h3>
-                        <div id="summary" class="summary-grid"></div>
+        <!-- CSV Analyzer -->
+        <div id="csv-tool" class="tool-section">
+            <div class="tool-card">
+                <h2 class="tool-title">CSV Analyzer</h2>
+                <div class="tool-content">
+                    <div class="file-upload-container">
+                        <label class="file-drop-zone">
+                            <svg class="upload-icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z" />
+                            </svg>
+                            <span class="upload-text">Select a CSV file</span>
+                            <input type='file' class="file-input" accept=".csv" id="csvInput" />
+                        </label>
                     </div>
-                    <div class="details-section">
-                        <h3 class="section-title">Column Details</h3>
-                        <div id="columnDetails" class="column-grid"></div>
+                    <div id="csv-results" class="results-container hidden">
+                        <div class="summary-section">
+                            <h3 class="section-title">Summary Statistics</h3>
+                            <div id="csv-summary" class="summary-grid"></div>
+                        </div>
+                        <div class="details-section">
+                            <h3 class="section-title">Column Details</h3>
+                            <div id="csv-column-details" class="column-grid"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- JSON Explorer -->
+        <div id="json-tool" class="tool-section hidden">
+            <div class="tool-card">
+                <h2 class="tool-title">JSON Explorer</h2>
+                <div class="tool-content">
+                    <div class="input-options">
+                        <div class="option-buttons">
+                            <button class="button button-primary" id="loadFileBtn">Load File</button>
+                            <button class="button button-secondary" id="pasteJsonBtn">Paste JSON</button>
+                        </div>
+                        <input type="file" id="jsonInput" class="file-input" accept=".json">
+                        <textarea id="jsonPaste" class="json-paste hidden" placeholder="Paste your JSON here..."></textarea>
+                    </div>
+                    
+                    <div id="json-results" class="results-container hidden">
+                        <div class="json-tools">
+                            <div class="search-box">
+                                <input type="text" id="jsonSearch" placeholder="Search keys..." class="search-input">
+                            </div>
+                            <div class="tool-buttons">
+                                <button class="button button-small" id="expandAllBtn">Expand All</button>
+                                <button class="button button-small" id="collapseAllBtn">Collapse All</button>
+                                <button class="button button-small" id="copyPathBtn">Copy Path</button>
+                            </div>
+                        </div>
+                        
+                        <div class="json-view-container">
+                            <div class="json-tree-view">
+                                <h3 class="section-title">Structure</h3>
+                                <div id="jsonTree" class="json-tree"></div>
+                            </div>
+                            <div class="json-details">
+                                <div class="stats-panel">
+                                    <h3 class="section-title">Statistics</h3>
+                                    <div id="jsonStats" class="stats-grid"></div>
+                                </div>
+                                <div class="path-panel">
+                                    <h3 class="section-title">Selected Path</h3>
+                                    <div id="selectedPath" class="selected-path"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Series Visualizer -->
+        <div id="timeseries-tool" class="tool-section hidden">
+            <div class="tool-card">
+                <h2 class="tool-title">Time Series Visualizer</h2>
+                <div class="tool-content">
+                    <div class="file-upload-container">
+                        <label class="file-drop-zone">
+                            <svg class="upload-icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z" />
+                            </svg>
+                            <span class="upload-text">Select a time series data file</span>
+                            <input type='file' class="file-input" accept=".csv,.json" id="timeseriesInput" />
+                        </label>
+                    </div>
+                    
+                    <div id="timeseries-results" class="results-container hidden">
+                        <div class="visualization-controls">
+                            <div class="control-group">
+                                <label for="chartType">Chart Type:</label>
+                                <select id="chartType" class="select-input">
+                                    <option value="line">Line Chart</option>
+                                    <option value="bar">Bar Chart</option>
+                                    <option value="area">Area Chart</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label for="smoothing">Smoothing:</label>
+                                <input type="range" id="smoothing" min="0" max="100" value="0" class="range-input">
+                            </div>
+                            <div class="control-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="showTrend" checked>
+                                    Show Trend
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <canvas id="timeseriesChart"></canvas>
+                        </div>
+                        
+                        <div class="analysis-section">
+                            <h3 class="section-title">Analysis</h3>
+                            <div class="analysis-grid">
+                                <div class="stat-card">
+                                    <h4 class="stat-title">Trend Analysis</h4>
+                                    <div id="trendAnalysis"></div>
+                                </div>
+                                <div class="stat-card">
+                                    <h4 class="stat-title">Seasonality</h4>
+                                    <div id="seasonalityAnalysis"></div>
+                                </div>
+                                <div class="stat-card">
+                                    <h4 class="stat-title">Summary Statistics</h4>
+                                    <div id="timeseriesStats"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <script>
-        document.getElementById('csvInput').addEventListener('change', async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const text = await file.text();
-            const results = Papa.parse(text, {
-                header: true,
-                dynamicTyping: true,
-                skipEmptyLines: true
-            });
-
-            const summary = analyzeCSV(results.data);
-            displayResults(summary);
-        });
-
-        function analyzeCSV(data) {
-            const summary = {};
-            const columns = Object.keys(data[0]);
-
-            columns.forEach(column => {
-                const values = data.map(row => row[column]).filter(val => val != null);
-                const type = typeof values[0];
-
-                summary[column] = {
-                    type,
-                    unique: new Set(values).size,
-                    missing: data.length - values.length,
-                    ...(type === 'number' ? getNumericStats(values) : getTextStats(values))
-                };
-            });
-
-            return summary;
-        }
-
-        function getNumericStats(values) {
-            const sorted = [...values].sort((a, b) => a - b);
-            return {
-                min: Math.min(...values),
-                max: Math.max(...values),
-                mean: values.reduce((a, b) => a + b, 0) / values.length,
-                median: sorted[Math.floor(sorted.length / 2)]
-            };
-        }
-
-        function getTextStats(values) {
-            return {
-                minLength: Math.min(...values.map(v => String(v).length)),
-                maxLength: Math.max(...values.map(v => String(v).length)),
-                mostCommon: getMostCommon(values)
-            };
-        }
-
-        function getMostCommon(values) {
-            const counts = values.reduce((acc, val) => {
-                acc[val] = (acc[val] || 0) + 1;
-                return acc;
-            }, {});
-            return Object.entries(counts)
-                .sort((a, b) => b[1] - a[1])[0][0];
-        }
-
-        function displayResults(summary) {
-            const resultsDiv = document.getElementById('results');
-            const summaryDiv = document.getElementById('summary');
-            const columnDetailsDiv = document.getElementById('columnDetails');
-
-            resultsDiv.classList.remove('hidden');
-            summaryDiv.innerHTML = '';
-            columnDetailsDiv.innerHTML = '';
-
-            Object.entries(summary).forEach(([column, stats]) => {
-                // Add summary card
-                const card = document.createElement('div');
-                card.className = 'stat-card';
-                card.innerHTML = `
-                    <h4 class="stat-title">${column}</h4>
-                    <p class="stat-info">Type: ${stats.type}</p>
-                    <p class="stat-info">Unique Values: ${stats.unique}</p>
-                    <p class="stat-info">Missing: ${stats.missing}</p>
-                `;
-                summaryDiv.appendChild(card);
-
-                // Add detailed stats
-                const details = document.createElement('div');
-                details.className = 'details-card';
-                let statsHTML = `<h4 class="details-title">${column}</h4>`;
-                
-                if (stats.type === 'number') {
-                    statsHTML += `
-                        <div class="stats-grid">
-                            <p class="stat-detail">Min: ${stats.min}</p>
-                            <p class="stat-detail">Max: ${stats.max}</p>
-                            <p class="stat-detail">Mean: ${stats.mean.toFixed(2)}</p>
-                            <p class="stat-detail">Median: ${stats.median}</p>
-                        </div>
-                    `;
-                } else {
-                    statsHTML += `
-                        <div class="stats-grid">
-                            <p class="stat-detail">Min Length: ${stats.minLength}</p>
-                            <p class="stat-detail">Max Length: ${stats.maxLength}</p>
-                            <p class="stat-detail">Most Common: ${stats.mostCommon}</p>
-                        </div>
-                    `;
-                }
-                details.innerHTML = statsHTML;
-                columnDetailsDiv.appendChild(details);
-            });
-        }
-    </script>
+    <!-- Scripts -->
+    <script src="src/tools/csv/analyzer.js"></script>
+    <script src="src/tools/json/explorer.js"></script>
+    <script src="src/tools/timeseries/visualizer.js"></script>
+    <script src="src/utils/navigation.js"></script>
 </body>
 </html>
