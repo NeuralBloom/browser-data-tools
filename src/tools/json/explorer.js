@@ -7,18 +7,93 @@ class JSONExplorer {
         this.initializeEventListeners();
     }
 
-    analyze(jsonString) {
+    initializeEventListeners() {
+        const fileInput = document.getElementById('jsonInput');
+        const loadFileBtn = document.getElementById('loadFileBtn');
+        const pasteJsonBtn = document.getElementById('pasteJsonBtn');
+        const jsonPaste = document.getElementById('jsonPaste');
+        const searchInput = document.getElementById('jsonSearch');
+        const expandAllBtn = document.getElementById('expandAllBtn');
+        const collapseAllBtn = document.getElementById('collapseAllBtn');
+        const copyPathBtn = document.getElementById('copyPathBtn');
+
+        if (loadFileBtn) {
+            loadFileBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+        }
+
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    this.loadFile(file);
+                }
+            });
+        }
+
+        if (pasteJsonBtn && jsonPaste) {
+            pasteJsonBtn.addEventListener('click', () => {
+                jsonPaste.style.display = jsonPaste.style.display === 'none' ? 'block' : 'none';
+            });
+
+            jsonPaste.addEventListener('input', () => {
+                this.validateJsonInput(jsonPaste.value);
+            });
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                this.handleSearch(e.target.value);
+            });
+        }
+
+        if (expandAllBtn) {
+            expandAllBtn.addEventListener('click', () => this.expandAll());
+        }
+
+        if (collapseAllBtn) {
+            collapseAllBtn.addEventListener('click', () => this.collapseAll());
+        }
+
+        if (copyPathBtn) {
+            copyPathBtn.addEventListener('click', () => this.copyPath());
+        }
+    }
+
+    async loadFile(file) {
         try {
-            this.data = typeof jsonString === 'string' ? 
-                JSON.parse(jsonString) : jsonString;
-            
-            return {
-                structure: this.mapStructure(this.data),
-                paths: this.getAllPaths(this.data),
-                stats: this.getStats(this.data)
-            };
+            const text = await file.text();
+            this.validateJsonInput(text);
         } catch (error) {
-            throw new Error(`JSON parsing failed: ${error.message}`);
+            this.showError('Error reading file: ' + error.message);
+        }
+    }
+
+    validateJsonInput(text) {
+        try {
+            const trimmedText = text.trim();
+            if (!trimmedText) {
+                return;
+            }
+
+            const data = JSON.parse(trimmedText);
+            this.data = data;
+            this.analyze();
+        } catch (error) {
+            this.showError('Invalid JSON: ' + error.message);
+        }
+    }
+
+    analyze() {
+        try {
+            const structure = this.mapStructure(this.data);
+            const paths = this.getAllPaths(this.data);
+            const stats = this.getStats(this.data);
+
+            this.renderResults(structure, paths, stats);
+        } catch (error) {
+            this.showError('Error analyzing JSON: ' + error.message);
         }
     }
 
@@ -86,22 +161,8 @@ class JSONExplorer {
             maxDepth: 0,
             arrayCount: 0,
             valueTypes: {},
-            nullCount: 0,
-            stringLengths: {
-                min: Infinity,
-                max: 0,
-                avg: 0
-            },
-            numberStats: {
-                min: Infinity,
-                max: -Infinity,
-                sum: 0,
-                count: 0
-            }
+            nullCount: 0
         };
-
-        const stringLengths = [];
-        const numbers = [];
 
         const traverse = (current, depth = 0) => {
             stats.maxDepth = Math.max(stats.maxDepth, depth);
@@ -125,52 +186,26 @@ class JSONExplorer {
 
             const type = typeof current;
             stats.valueTypes[type] = (stats.valueTypes[type] || 0) + 1;
-
-            if (type === 'string') {
-                const length = current.length;
-                stringLengths.push(length);
-                stats.stringLengths.min = Math.min(stats.stringLengths.min, length);
-                stats.stringLengths.max = Math.max(stats.stringLengths.max, length);
-            }
-
-            if (type === 'number') {
-                numbers.push(current);
-                stats.numberStats.min = Math.min(stats.numberStats.min, current);
-                stats.numberStats.max = Math.max(stats.numberStats.max, current);
-                stats.numberStats.sum += current;
-                stats.numberStats.count++;
-            }
         };
 
         traverse(obj);
-
-        // Calculate averages
-        if (stringLengths.length > 0) {
-            stats.stringLengths.avg = stringLengths.reduce((a, b) => a + b, 0) / stringLengths.length;
-        }
-
-        if (stats.numberStats.count > 0) {
-            stats.numberStats.avg = stats.numberStats.sum / stats.numberStats.count;
-        }
-
         return stats;
     }
 
+    handleSearch(query) {
+        const results = this.findPaths(query);
+        this.renderSearchResults(results);
+    }
+
     findPaths(query) {
-        const queryParts = query.split('.');
         const results = [];
+        query = query.toLowerCase();
 
         this.flattenedPaths.forEach((value, path) => {
-            const pathParts = path.split('.');
-            let matches = true;
+            const pathLower = path.toLowerCase();
+            const matches = pathLower.includes(query) || 
+                           (value.value && String(value.value).toLowerCase().includes(query));
             
-            for (let i = 0; i < queryParts.length; i++) {
-                if (queryParts[i] !== '*' && queryParts[i] !== pathParts[i]) {
-                    matches = false;
-                    break;
-                }
-            }
-
             if (matches) {
                 results.push({ path, ...value });
             }
@@ -179,77 +214,136 @@ class JSONExplorer {
         return results;
     }
 
-    flatten() {
-        const result = {};
-        
-        this.flattenedPaths.forEach((value, path) => {
-            if (value.value !== undefined) {
-                result[path] = value.value;
-            }
-        });
+    renderResults(structure, paths, stats) {
+        const jsonTree = document.getElementById('jsonTree');
+        const jsonStats = document.getElementById('jsonStats');
+        const resultsContainer = document.getElementById('json-results');
 
-        return result;
-    }
-
-    query(path) {
-        const parts = path.split('.');
-        let current = this.data;
-
-        for (const part of parts) {
-            if (current === null || current === undefined) return undefined;
-            current = current[part];
+        if (resultsContainer) {
+            resultsContainer.style.display = 'block';
         }
 
-        return current;
+        if (jsonTree) {
+            jsonTree.innerHTML = this.renderTree(structure);
+        }
+
+        if (jsonStats) {
+            jsonStats.innerHTML = this.renderStats(stats);
+        }
     }
 
-    diff(other) {
-        const differences = [];
-        const otherExplorer = other instanceof JSONExplorer ? 
-            other : new JSONExplorer().analyze(other);
+    renderTree(structure, level = 0) {
+        if (typeof structure !== 'object' || structure === null) {
+            return this.renderValue(structure);
+        }
 
-        const compare = (path1, path2) => {
-            const value1 = this.query(path1);
-            const value2 = otherExplorer.query(path2);
+        const indent = '  '.repeat(level);
+        const items = Object.entries(structure).map(([key, value]) => {
+            const isExpandable = typeof value === 'object' && value !== null;
+            const toggleBtn = isExpandable ? 
+                `<button class="json-tree-toggle">▼</button>` : '';
 
-            if (JSON.stringify(value1) !== JSON.stringify(value2)) {
-                differences.push({
-                    path: path1,
-                    original: value1,
-                    new: value2
-                });
-            }
-        };
-
-        const paths1 = new Set(this.getAllPaths(this.data).map(p => p.path));
-        const paths2 = new Set(otherExplorer.getAllPaths(otherExplorer.data).map(p => p.path));
-
-        // Check common paths
-        paths1.forEach(path => {
-            if (paths2.has(path)) {
-                compare(path, path);
-            } else {
-                differences.push({
-                    path,
-                    original: this.query(path),
-                    new: undefined,
-                    type: 'removed'
-                });
-            }
+            return `
+                <div class="json-tree-item" data-level="${level}">
+                    ${toggleBtn}
+                    <span class="json-key">${this.escapeHtml(key)}</span>
+                    ${isExpandable ? this.renderTree(value, level + 1) : `: ${this.renderValue(value)}`}
+                </div>
+            `;
         });
 
-        // Check for new paths
-        paths2.forEach(path => {
-            if (!paths1.has(path)) {
-                differences.push({
-                    path,
-                    original: undefined,
-                    new: otherExplorer.query(path),
-                    type: 'added'
-                });
-            }
-        });
+        return items.join('\n');
+    }
 
-        return differences;
+    renderValue(value) {
+        if (value === null) return '<span class="json-null">null</span>';
+        if (typeof value === 'string') return `<span class="json-string">"${this.escapeHtml(value)}"</span>`;
+        if (typeof value === 'number') return `<span class="json-number">${value}</span>`;
+        if (typeof value === 'boolean') return `<span class="json-boolean">${value}</span>`;
+        return `<span class="json-${typeof value}">${this.escapeHtml(String(value))}</span>`;
+    }
+
+    renderStats(stats) {
+        return `
+            <div class="stat-card">
+                <h4>Structure</h4>
+                <div>Total Keys: ${stats.totalKeys}</div>
+                <div>Max Depth: ${stats.maxDepth}</div>
+                <div>Arrays: ${stats.arrayCount}</div>
+            </div>
+            <div class="stat-card">
+                <h4>Types</h4>
+                ${Object.entries(stats.valueTypes).map(([type, count]) => 
+                    `<div>${type}: ${count}</div>`
+                ).join('')}
+            </div>
+        `;
+    }
+
+    renderSearchResults(results) {
+        const jsonTree = document.getElementById('jsonTree');
+        if (!jsonTree) return;
+
+        if (results.length === 0) {
+            jsonTree.innerHTML = '<div class="no-results">No matches found</div>';
+            return;
+        }
+
+        jsonTree.innerHTML = results.map(result => `
+            <div class="search-result">
+                <div class="result-path">${this.escapeHtml(result.path)}</div>
+                <div class="result-value">${this.renderValue(result.value)}</div>
+            </div>
+        `).join('');
+    }
+
+    expandAll() {
+        const items = document.querySelectorAll('.json-tree-item');
+        items.forEach(item => item.classList.remove('collapsed'));
+    }
+
+    collapseAll() {
+        const items = document.querySelectorAll('.json-tree-item');
+        items.forEach(item => item.classList.add('collapsed'));
+    }
+
+    async copyPath() {
+        const selectedPath = document.querySelector('.json-tree-item.selected')?.dataset.path;
+        if (selectedPath) {
+            try {
+                await navigator.clipboard.writeText(selectedPath);
+                this.showNotification('Path copied to clipboard');
+            } catch (error) {
+                this.showError('Failed to copy path');
+            }
+        }
+    }
+
+    showError(message) {
+        const errorEl = document.createElement('div');
+        errorEl.className = 'error-message';
+        errorEl.textContent = message;
+        
+        const resultsContainer = document.getElementById('json-results');
+        if (resultsContainer) {
+            resultsContainer.innerHTML = '';
+            resultsContainer.appendChild(errorEl);
+            resultsContainer.style.display = 'block';
+        }
+    }
+
+    showNotification(message) {
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 2000);
+    }
+
+    escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
     }
 }
