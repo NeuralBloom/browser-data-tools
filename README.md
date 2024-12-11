@@ -23,7 +23,7 @@ A collection of powerful data analysis tools that run entirely in your browser. 
 
 ## 🔥 Quick Start
 
-1. Visit [https://yourusername.github.io/browser-data-tools](https://yourusername.github.io/browser-data-tools)
+1. Visit [https://Neuralbloom.github.io/browser-data-tools](https://Neuralbloom.github.io/browser-data-tools)
 2. Select your tool of choice
 3. Upload your data
 4. Get instant results
