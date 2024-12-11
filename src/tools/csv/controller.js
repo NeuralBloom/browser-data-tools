@@ -2,10 +2,16 @@
 
 class CSVController {
     constructor() {
-        this.analyzer = new CSVAnalyzer();
-        this.renderer = new CSVRenderer('csv-summary', 'csv-column-details');
-        this.initWorker();
-        this.initializeEventListeners();
+        console.log('Initializing CSV Controller');
+        try {
+            this.analyzer = new CSVAnalyzer();
+            this.renderer = new CSVRenderer('csv-summary', 'csv-column-details');
+            this.initWorker();
+            this.initializeEventListeners();
+        } catch (error) {
+            console.error('Error initializing CSV Controller:', error);
+            this.showError('Failed to initialize: ' + error.message);
+        }
     }
 
     initWorker() {
@@ -15,21 +21,23 @@ class CSVController {
 
             this.worker.onmessage = (e) => {
                 console.log('Worker message received:', e.data);
-                const { type, data, error } = e.data;
-                
-                if (type === 'error') {
-                    console.error('Worker error:', error);
+                if (!e.data) {
+                    console.error('Empty response from worker');
                     this.hideLoading();
-                    this.showError(error);
+                    this.showError('Invalid response from worker');
                     return;
                 }
 
-                if (type === 'success') {
-                    if (!data) {
-                        this.showError('No data received from worker');
-                        return;
-                    }
+                const { type, data, error } = e.data;
+                
+                if (type === 'error' || error) {
+                    console.error('Worker error:', error);
+                    this.hideLoading();
+                    this.showError(error || 'Unknown worker error');
+                    return;
+                }
 
+                if (type === 'success' && data) {
                     try {
                         console.log('Analysis complete:', data);
                         const results = this.formatWorkerResults(data);
@@ -44,13 +52,15 @@ class CSVController {
                         console.error('Error processing worker results:', error);
                         this.showError('Error processing analysis results: ' + error.message);
                     }
+                } else {
+                    this.showError('Invalid response format from worker');
                 }
             };
 
             this.worker.onerror = (error) => {
-                console.error('Worker error:', error);
+                console.error('Worker error event:', error);
                 this.hideLoading();
-                this.showError('Worker error: ' + error.message);
+                this.showError('Worker error: ' + (error.message || 'Unknown error'));
             };
         } catch (error) {
             console.error('Failed to initialize worker:', error);
@@ -138,15 +148,8 @@ class CSVController {
                 throw new Error('File is empty');
             }
 
-            // First validate the CSV structure
-            this.worker.postMessage({ 
-                command: 'validate',
-                file: fileText
-            });
-
-            this.showLoading('Validating CSV structure...');
-
             // Then analyze the content
+            console.log('Sending file to worker for analysis');
             this.worker.postMessage({ 
                 command: 'analyze',
                 file: fileText
@@ -234,7 +237,6 @@ class CSVController {
         try {
             let size = 0;
             Object.values(data).forEach(col => {
-                // Estimate based on column type and number of values
                 const valueCount = (col.total || 0) - (col.missing || 0);
                 switch (col.type) {
                     case 'number':
@@ -261,7 +263,7 @@ class CSVController {
     }
 
     formatColumnStats(data) {
-        if (!data) return {};
+        if (!data || !data.type) return {};
 
         switch (data.type) {
             case 'number':
@@ -278,8 +280,7 @@ class CSVController {
                     minLength: data.minLength || 0,
                     maxLength: data.maxLength || 0,
                     avgLength: data.avgLength || 0,
-                    empty: data.empty || 0,
-                    topValues: data.topValues || []
+                    empty: data.empty || 0
                 };
             case 'date':
                 return {
