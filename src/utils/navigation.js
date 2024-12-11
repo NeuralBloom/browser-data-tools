@@ -36,10 +36,6 @@ class NavigationController {
         const hashTool = this.getToolFromHash();
         if (hashTool) return hashTool;
 
-        // Check localStorage for last used tool
-        const savedTool = localStorage.getItem('lastUsedTool');
-        if (savedTool && this.tools.includes(savedTool)) return savedTool;
-
         // Default to first tool
         return this.tools[0];
     }
@@ -54,29 +50,31 @@ class NavigationController {
 
         // Update navigation links
         document.querySelectorAll('.nav-link').forEach(link => {
-            if (link.getAttribute('data-tool') === tool) {
-                link.classList.add('active');
-            } else {
-                link.classList.remove('active');
-            }
+            const isActive = link.getAttribute('data-tool') === tool;
+            link.classList.toggle('active', isActive);
+            link.setAttribute('aria-current', isActive ? 'page' : 'false');
         });
 
         // Update tool sections
         document.querySelectorAll('.tool-section').forEach(section => {
-            if (section.id === `${tool}-tool`) {
-                section.classList.remove('hidden');
-            } else {
-                section.classList.add('hidden');
-            }
+            // Using display style directly instead of classes
+            section.style.display = section.id === `${tool}-tool` ? 'block' : 'none';
         });
 
-        // Update URL hash and localStorage
-        window.location.hash = tool;
-        localStorage.setItem('lastUsedTool', tool);
+        // Update URL hash
+        if (window.location.hash !== `#${tool}`) {
+            window.location.hash = tool;
+        }
+        
         this.currentTool = tool;
 
         // Dispatch event for tool change
-        window.dispatchEvent(new CustomEvent('toolChange', { detail: { tool } }));
+        window.dispatchEvent(new CustomEvent('toolChange', { 
+            detail: { tool, previous: this.currentTool } 
+        }));
+
+        // Log for debugging
+        console.log(`Switched to ${tool} tool`);
     }
 }
 
