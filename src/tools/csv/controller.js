@@ -1,8 +1,5 @@
 // src/tools/csv/controller.js
 
-import { CSVAnalyzer } from './analyzer.js';
-import { CSVRenderer } from './renderer.js';
-
 class CSVController {
     constructor() {
         this.analyzer = new CSVAnalyzer();
@@ -13,7 +10,7 @@ class CSVController {
 
     initWorker() {
         try {
-            this.worker = new Worker('/src/workers/csv-worker.js');
+            this.worker = new Worker('src/workers/csv-worker.js');
             console.log('Worker initialized');
 
             this.worker.onmessage = (e) => {
@@ -21,13 +18,14 @@ class CSVController {
                 const { type, data, error } = e.data;
                 
                 if (type === 'error') {
+                    console.error('Worker error:', error);
                     this.hideLoading();
                     this.showError(error);
                     return;
                 }
 
                 if (type === 'success') {
-                    console.log('Analysis results:', data);
+                    console.log('Analysis complete:', data);
                     const results = this.formatWorkerResults(data);
                     this.renderer.render(results);
                     this.hideLoading();
@@ -65,6 +63,7 @@ class CSVController {
             }
         });
 
+        // Drag and drop handlers
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             dropZone.classList.add('drag-over');
@@ -76,7 +75,6 @@ class CSVController {
 
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
-            console.log('File drop event');
             dropZone.classList.remove('drag-over');
             
             const file = e.dataTransfer.files[0];
@@ -94,23 +92,27 @@ class CSVController {
             return;
         }
 
-        try {
-            // Create a text copy of the file for the worker
-            const fileText = await file.text();
-            console.log('File text loaded, sending to worker');
+        if (!file.name.toLowerCase().endsWith('.csv')) {
+            this.showError('Please upload a CSV file');
+            return;
+        }
 
-            this.showLoading('Analyzing CSV file...');
-            
-            // Send the file text to the worker
+        try {
+            this.showLoading('Reading file...');
+            const fileText = await file.text();
+            console.log('File loaded, sending to worker');
+
             this.worker.postMessage({ 
                 command: 'analyze',
                 file: fileText
             });
+            
+            this.showLoading('Analyzing CSV data...');
 
         } catch (error) {
             console.error('Error processing file:', error);
             this.hideLoading();
-            this.showError(error.message);
+            this.showError('Error reading file: ' + error.message);
         }
     }
 
@@ -197,7 +199,10 @@ class CSVController {
             <div class="loading-text">${message}</div>
         `;
         
-        document.querySelector('.tool-content').appendChild(loadingEl);
+        const container = document.querySelector('.tool-content');
+        if (container) {
+            container.appendChild(loadingEl);
+        }
     }
 
     hideLoading() {
@@ -214,16 +219,10 @@ class CSVController {
         errorEl.textContent = message;
         
         const resultsContainer = document.getElementById('csv-results');
-        resultsContainer.innerHTML = '';
-        resultsContainer.appendChild(errorEl);
-        resultsContainer.style.display = 'block';
+        if (resultsContainer) {
+            resultsContainer.innerHTML = '';
+            resultsContainer.appendChild(errorEl);
+            resultsContainer.style.display = 'block';
+        }
     }
 }
-
-// Initialize the controller when the DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Initializing CSV Controller');
-    window.csvController = new CSVController();
-});
-
-export default CSVController;
