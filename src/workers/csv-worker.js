@@ -3,174 +3,172 @@
 importScripts('https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js');
 
 self.addEventListener('message', async (e) => {
-    const { file, command, options } = e.data;
+    console.log('Worker received message:', e.data);
+    
+    if (!e.data) {
+        self.postMessage({ 
+            type: 'error', 
+            error: 'No data received by worker' 
+        });
+        return;
+    }
+
+    const { file, command } = e.data;
+    
+    if (!file) {
+        self.postMessage({ 
+            type: 'error', 
+            error: 'No file data provided' 
+        });
+        return;
+    }
     
     try {
         switch (command) {
             case 'analyze':
+                console.log('Worker starting analysis');
                 const results = await analyzeCSV(file);
-                self.postMessage({ type: 'success', data: results });
-                break;
-            
-            case 'validate':
-                const validation = await validateCSV(file);
-                self.postMessage({ type: 'success', data: validation });
+                console.log('Worker analysis complete:', results);
+                self.postMessage({ 
+                    type: 'success', 
+                    data: results 
+                });
                 break;
             
             default:
                 throw new Error(`Unknown command: ${command}`);
         }
     } catch (error) {
-        self.postMessage({ type: 'error', error: error.message });
+        console.error('Worker error:', error);
+        self.postMessage({ 
+            type: 'error', 
+            error: error.message || 'Unknown error in worker' 
+        });
     }
 });
 
-async function analyzeCSV(file) {
+function analyzeCSV(fileContent) {
     return new Promise((resolve, reject) => {
-        Papa.parse(file, {
+        Papa.parse(fileContent, {
             header: true,
             dynamicTyping: true,
             skipEmptyLines: true,
-            worker: true,
-            chunk: (results, parser) => {
-                // Process data in chunks to handle large files
-                processChunk(results.data);
-            },
             complete: (results) => {
-                const analysis = finalizeAnalysis(results.data);
-                resolve(analysis);
+                if (!results || !results.data) {
+                    reject(new Error('Failed to parse CSV data'));
+                    return;
+                }
+
+                try {
+                    const analysis = processData(results.data);
+                    resolve(analysis);
+                } catch (error) {
+                    reject(error);
+                }
             },
             error: (error) => {
-                reject(error);
+                reject(new Error('CSV parsing error: ' + error.message));
             }
         });
     });
 }
 
-const columnStats = new Map();
-let totalRows = 0;
+function processData(data) {
+    if (!Array.isArray(data) || data.length === 0) {
+        throw new Error('Invalid or empty CSV data');
+    }
 
-function processChunk(data) {
-    totalRows += data.length;
-    
-    // Process each column in the chunk
-    Object.entries(data[0] || {}).forEach(([column, _]) => {
-        if (!columnStats.has(column)) {
-            columnStats.set(column, initializeColumnStats());
-        }
-        
-        const stats = columnStats.get(column);
-        data.forEach(row => {
-            updateColumnStats(stats, row[column]);
+    const columns = {};
+    const headers = Object.keys(data[0]);
+
+    headers.forEach(header => {
+        columns[header] = initializeColumnStats();
+    });
+
+    let totalRows = data.length;
+
+    // Process each row
+    data.forEach(row => {
+        headers.forEach(header => {
+            updateColumnStats(columns[header], row[header]);
         });
     });
+
+    // Finalize statistics for each column
+    headers.forEach(header => {
+        finalizeColumnStats(columns[header], totalRows);
+    });
+
+    return columns;
 }
 
 function initializeColumnStats() {
     return {
         type: null,
         count: 0,
-        nullCount: 0,
-        uniqueValues: new Set(),
-        sum: 0,
+        missing: 0,
+        unique: new Set(),
+        total: 0,
+        // Numeric specific
         min: Infinity,
         max: -Infinity,
-        textLengths: [],
+        sum: 0,
+        // String specific
+        minLength: Infinity,
+        maxLength: 0,
+        lengthSum: 0,
+        // For all types
+        values: []
     };
 }
 
 function updateColumnStats(stats, value) {
+    // Handle null, undefined, or empty string
     if (value === null || value === undefined || value === '') {
-        stats.nullCount++;
+        stats.missing++;
         return;
     }
 
-    stats.count++;
-    stats.uniqueValues.add(value);
-
-    if (stats.type === null) {
+    // Determine type if not yet set
+    if (!stats.type) {
         stats.type = typeof value;
     }
 
-    if (typeof value === 'number') {
-        stats.sum += value;
+    stats.count++;
+    stats.unique.add(value);
+    stats.values.push(value);
+
+    if (typeof value === 'number' && !isNaN(value)) {
         stats.min = Math.min(stats.min, value);
         stats.max = Math.max(stats.max, value);
+        stats.sum += value;
     } else if (typeof value === 'string') {
-        stats.textLengths.push(value.length);
+        stats.minLength = Math.min(stats.minLength, value.length);
+        stats.maxLength = Math.max(stats.maxLength, value.length);
+        stats.lengthSum += value.length;
     }
 }
 
-function finalizeAnalysis(data) {
-    const analysis = {};
+function finalizeColumnStats(stats, totalRows) {
+    stats.total = totalRows;
+    stats.unique = stats.unique.size;
 
-    columnStats.forEach((stats, column) => {
-        analysis[column] = {
-            type: stats.type,
-            unique: stats.uniqueValues.size,
-            missing: stats.nullCount,
-            total: totalRows
-        };
-
-        if (stats.type === 'number') {
-            analysis[column] = {
-                ...analysis[column],
-                min: stats.min,
-                max: stats.max,
-                mean: stats.sum / stats.count,
-                hasDecimals: hasDecimalValues(stats.uniqueValues)
-            };
-        } else if (stats.type === 'string') {
-            analysis[column] = {
-                ...analysis[column],
-                minLength: Math.min(...stats.textLengths),
-                maxLength: Math.max(...stats.textLengths),
-                avgLength: stats.textLengths.reduce((a, b) => a + b, 0) / stats.textLengths.length
-            };
+    if (stats.type === 'number') {
+        if (stats.count > 0) {
+            stats.mean = stats.sum / stats.count;
+            stats.hasDecimals = stats.values.some(v => v % 1 !== 0);
+            stats.zeros = stats.values.filter(v => v === 0).length;
+            stats.negative = stats.values.filter(v => v < 0).length;
         }
-    });
+        delete stats.sum;
+    } else if (stats.type === 'string') {
+        if (stats.count > 0) {
+            stats.avgLength = stats.lengthSum / stats.count;
+            stats.empty = stats.values.filter(v => v === '').length;
+        }
+        delete stats.lengthSum;
+    }
 
-    return analysis;
-}
-
-function hasDecimalValues(values) {
-    return [...values].some(value => value % 1 !== 0);
-}
-
-async function validateCSV(file) {
-    return new Promise((resolve, reject) => {
-        Papa.parse(file, {
-            preview: 10, // Check first 10 rows
-            complete: (results) => {
-                const validation = {
-                    isValid: true,
-                    errors: [],
-                    warnings: []
-                };
-
-                // Check for basic structure
-                if (!results.data || results.data.length === 0) {
-                    validation.isValid = false;
-                    validation.errors.push('File is empty');
-                }
-
-                // Check for consistent column count
-                const headerCount = results.data[0]?.length || 0;
-                const inconsistentRows = results.data.findIndex(row => 
-                    row.length !== headerCount
-                );
-
-                if (inconsistentRows !== -1) {
-                    validation.warnings.push(
-                        `Inconsistent column count at row ${inconsistentRows + 1}`
-                    );
-                }
-
-                resolve(validation);
-            },
-            error: (error) => {
-                reject(error);
-            }
-        });
-    });
+    // Clean up
+    delete stats.values;
 }
