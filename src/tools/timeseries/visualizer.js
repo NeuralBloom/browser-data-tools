@@ -1,6 +1,6 @@
 // src/tools/timeseries/visualizer.js
 
-export class TimeSeriesVisualizer {
+class TimeSeriesVisualizer {
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
