@@ -1,9 +1,10 @@
 // src/tools/json/explorer.js
 
-export class JSONExplorer {
+class JSONExplorer {
     constructor() {
         this.data = null;
         this.flattenedPaths = new Map();
+        this.initializeEventListeners();
     }
 
     analyze(jsonString) {
