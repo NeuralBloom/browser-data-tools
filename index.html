@@ -15,9 +15,9 @@
                     <h1>Data Analysis Tools</h1>
                 </div>
                 <div class="nav-links">
-                    <a href="#" class="nav-link" data-tool="csv">CSV Analyzer</a>
-                    <a href="#" class="nav-link" data-tool="json">JSON Explorer</a>
-                    <a href="#" class="nav-link" data-tool="timeseries">Time Series</a>
+                    <a href="#csv" class="nav-link" data-tool="csv">CSV Analyzer</a>
+                    <a href="#json" class="nav-link" data-tool="json">JSON Explorer</a>
+                    <a href="#timeseries" class="nav-link" data-tool="timeseries">Time Series</a>
                 </div>
             </div>
         </div>
@@ -25,12 +25,12 @@
 
     <main class="container">
         <!-- CSV Analyzer -->
-        <div id="csv-tool" class="tool-section">
+        <section id="csv-tool" class="tool-section">
             <div class="tool-card">
                 <h2 class="tool-title">CSV Analyzer</h2>
                 <div class="tool-content">
                     <div class="file-upload-container">
-                        <label class="file-drop-zone">
+                        <label class="file-drop-zone" for="csvInput">
                             <svg class="upload-icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                 <path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z" />
                             </svg>
@@ -38,7 +38,7 @@
                             <input type='file' class="file-input" accept=".csv" id="csvInput" />
                         </label>
                     </div>
-                    <div id="csv-results" class="results-container hidden">
+                    <div id="csv-results" class="results-container" style="display: none;">
                         <div class="summary-section">
                             <h3 class="section-title">Summary Statistics</h3>
                             <div id="csv-summary" class="summary-grid"></div>
@@ -50,10 +50,10 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- JSON Explorer -->
-        <div id="json-tool" class="tool-section hidden">
+        <section id="json-tool" class="tool-section">
             <div class="tool-card">
                 <h2 class="tool-title">JSON Explorer</h2>
                 <div class="tool-content">
@@ -63,10 +63,10 @@
                             <button class="button button-secondary" id="pasteJsonBtn">Paste JSON</button>
                         </div>
                         <input type="file" id="jsonInput" class="file-input" accept=".json">
-                        <textarea id="jsonPaste" class="json-paste hidden" placeholder="Paste your JSON here..."></textarea>
+                        <textarea id="jsonPaste" class="json-paste" style="display: none;" placeholder="Paste your JSON here..."></textarea>
                     </div>
                     
-                    <div id="json-results" class="results-container hidden">
+                    <div id="json-results" class="results-container" style="display: none;">
                         <div class="json-tools">
                             <div class="search-box">
                                 <input type="text" id="jsonSearch" placeholder="Search keys..." class="search-input">
@@ -97,15 +97,15 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- Time Series Visualizer -->
-        <div id="timeseries-tool" class="tool-section hidden">
+        <section id="timeseries-tool" class="tool-section">
             <div class="tool-card">
                 <h2 class="tool-title">Time Series Visualizer</h2>
                 <div class="tool-content">
                     <div class="file-upload-container">
-                        <label class="file-drop-zone">
+                        <label class="file-drop-zone" for="timeseriesInput">
                             <svg class="upload-icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                 <path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z" />
                             </svg>
@@ -114,111 +114,20 @@
                         </label>
                     </div>
                     
-                    <div id="timeseries-results" class="results-container hidden">
-                        <div class="visualization-controls">
-                            <div class="control-group">
-                                <label for="chartType">Chart Type:</label>
-                                <select id="chartType" class="select-input">
-                                    <option value="line">Line Chart</option>
-                                    <option value="bar">Bar Chart</option>
-                                    <option value="area">Area Chart</option>
-                                </select>
-                            </div>
-                            <div class="control-group">
-                                <label for="smoothing">Smoothing:</label>
-                                <input type="range" id="smoothing" min="0" max="100" value="0" class="range-input">
-                                <span class="range-value">0%</span>
-                            </div>
-                            <div class="control-group">
-                                <label for="dateRange">Date Range:</label>
-                                <div class="date-range-inputs">
-                                    <input type="date" id="startDate" class="date-input">
-                                    <input type="date" id="endDate" class="date-input">
-                                </div>
-                            </div>
-                            <div class="control-group options">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="showTrend" checked>
-                                    Show Trend
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="showGrid" checked>
-                                    Show Grid
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="showAnnotations" checked>
-                                    Show Annotations
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="chart-container">
-                            <canvas id="timeseriesChart"></canvas>
-                            <div class="chart-toolbar">
-                                <button class="button button-small" id="addAnnotation">
-                                    <svg class="icon" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"/>
-                                    </svg>
-                                    Add Annotation
-                                </button>
-                                <button class="button button-small" id="exportChart">
-                                    <svg class="icon" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"/>
-                                    </svg>
-                                    Export
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="analysis-section">
-                            <h3 class="section-title">Analysis</h3>
-                            <div class="analysis-grid">
-                                <div class="stat-card">
-                                    <h4 class="stat-title">Trend Analysis</h4>
-                                    <div id="trendAnalysis" class="stat-content">
-                                        <div class="trend-direction"></div>
-                                        <div class="trend-strength"></div>
-                                    </div>
-                                </div>
-                                <div class="stat-card">
-                                    <h4 class="stat-title">Seasonality</h4>
-                                    <div id="seasonalityAnalysis" class="stat-content">
-                                        <div class="seasonality-status"></div>
-                                        <div class="seasonality-period"></div>
-                                    </div>
-                                </div>
-                                <div class="stat-card">
-                                    <h4 class="stat-title">Summary Statistics</h4>
-                                    <div id="timeseriesStats" class="stat-content">
-                                        <div class="stats-grid">
-                                            <div class="stat-item">
-                                                <span class="stat-label">Mean</span>
-                                                <span class="stat-value mean"></span>
-                                            </div>
-                                            <div class="stat-item">
-                                                <span class="stat-label">Min</span>
-                                                <span class="stat-value min"></span>
-                                            </div>
-                                            <div class="stat-item">
-                                                <span class="stat-label">Max</span>
-                                                <span class="stat-value max"></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div id="timeseries-results" class="results-container" style="display: none;">
+                        <!-- Time series content here -->
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
     </main>
 
     <!-- Scripts -->
     <script type="module">
         import { JSONExplorer } from './src/tools/json/explorer.js';
         import { TimeSeriesVisualizer } from './src/tools/timeseries/visualizer.js';
+        
+        // Make them available globally
         window.JSONExplorer = JSONExplorer;
         window.TimeSeriesVisualizer = TimeSeriesVisualizer;
     </script>
