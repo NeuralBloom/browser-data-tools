@@ -1,6 +1,6 @@
 // src/tools/csv/analyzer.js
 
-export class CSVAnalyzer {
+class CSVAnalyzer {
     constructor() {
         this.data = null;
         this.columns = null;
