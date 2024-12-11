@@ -3,57 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
     <title>Browser-Based Data Analysis Tools</title>
-    <link rel="stylesheet" href="static/css/styles.css?v=1.0.0">
-    <script>
-        // Define version for cache busting
-        window.APP_VERSION = '1.0.0';
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js" 
-            integrity="sha512-GLQj5e8o6e4DM95Z4q7IuEaL5nkTgiWZ6Rz1+t6E+9YYSG1mow6t8C8bBcvvBNz+b7OUnLj0Y3M1cL7Y1mBcg==" 
-            crossorigin="anonymous" 
-            referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="static/css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 </head>
 <body>
-    <nav class="main-nav" role="navigation">
+    <nav class="main-nav">
         <div class="container">
             <div class="nav-content">
                 <div class="nav-brand">
                     <h1>Data Analysis Tools</h1>
                 </div>
-                <div class="nav-links" role="tablist">
-                    <a href="#csv" class="nav-link" data-tool="csv" role="tab" aria-selected="true">CSV Analyzer</a>
-                    <a href="#json" class="nav-link" data-tool="json" role="tab" aria-selected="false">JSON Explorer</a>
-                    <a href="#timeseries" class="nav-link" data-tool="timeseries" role="tab" aria-selected="false">Time Series</a>
+                <div class="nav-links">
+                    <a href="#csv" class="nav-link active" data-tool="csv">CSV Analyzer</a>
+                    <a href="#json" class="nav-link" data-tool="json">JSON Explorer</a>
+                    <a href="#timeseries" class="nav-link" data-tool="timeseries">Time Series</a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <main class="container" role="main">
+    <main class="container">
         <!-- CSV Analyzer -->
-        <section id="csv-tool" class="tool-section" role="tabpanel" aria-labelledby="csv-tab">
+        <section id="csv-tool" class="tool-section">
             <div class="tool-card">
                 <h2 class="tool-title">CSV Analyzer</h2>
                 <div class="tool-content">
                     <div class="file-upload-container">
-                        <label class="file-drop-zone" for="csvInput" role="button" tabindex="0">
-                            <svg class="upload-icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" aria-hidden="true">
+                        <label class="file-drop-zone" for="csvInput">
+                            <svg class="upload-icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                 <path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z" />
                             </svg>
-                            <span class="upload-text" id="csvUploadText">Select a CSV file or drag and drop here</span>
-                            <input type="file" 
-                                   class="file-input" 
-                                   id="csvInput" 
-                                   name="csvFile" 
-                                   accept=".csv"
-                                   aria-describedby="csvUploadText" 
-                                   title="Choose CSV file to upload" />
+                            <span class="upload-text">Select a CSV file or drag and drop here</span>
+                            <input type="file" class="file-input" id="csvInput" accept=".csv" />
                         </label>
                     </div>
-                    <div id="csv-results" class="results-container" aria-live="polite" hidden>
+                    <div id="csv-results" class="results-container" style="display: none;">
                         <div class="summary-section">
                             <h3 class="section-title">Summary Statistics</h3>
                             <div id="csv-summary" class="summary-grid"></div>
@@ -68,7 +53,7 @@
         </section>
 
         <!-- JSON Explorer -->
-        <section id="json-tool" class="tool-section" role="tabpanel" aria-labelledby="json-tab" hidden>
+        <section id="json-tool" class="tool-section" style="display: none;">
             <div class="tool-card">
                 <h2 class="tool-title">JSON Explorer</h2>
                 <div class="tool-content">
@@ -77,28 +62,14 @@
                             <button class="button button-primary" id="loadFileBtn">Load File</button>
                             <button class="button button-secondary" id="pasteJsonBtn">Paste JSON</button>
                         </div>
-                        <input type="file" 
-                               id="jsonInput" 
-                               class="file-input" 
-                               accept=".json"
-                               aria-label="Choose JSON file" 
-                               title="Choose JSON file to upload" />
-                        <textarea id="jsonPaste" 
-                                  class="json-paste" 
-                                  placeholder="Paste your JSON here..."
-                                  aria-label="Paste JSON content" 
-                                  hidden></textarea>
+                        <input type="file" id="jsonInput" class="file-input" accept=".json">
+                        <textarea id="jsonPaste" class="json-paste" placeholder="Paste your JSON here..." style="display: none;"></textarea>
                     </div>
                     
-                    <div id="json-results" class="results-container" aria-live="polite" hidden>
+                    <div id="json-results" class="results-container" style="display: none;">
                         <div class="json-tools">
                             <div class="search-box">
-                                <label for="jsonSearch" class="visually-hidden">Search JSON content</label>
-                                <input type="text" 
-                                       id="jsonSearch" 
-                                       class="search-input" 
-                                       placeholder="Search keys..."
-                                       aria-label="Search within JSON" />
+                                <input type="text" id="jsonSearch" placeholder="Search keys..." class="search-input">
                             </div>
                             <div class="tool-buttons">
                                 <button class="button button-small" id="expandAllBtn">Expand All</button>
@@ -110,7 +81,7 @@
                         <div class="json-view-container">
                             <div class="json-tree-view">
                                 <h3 class="section-title">Structure</h3>
-                                <div id="jsonTree" class="json-tree" role="tree"></div>
+                                <div id="jsonTree" class="json-tree"></div>
                             </div>
                             <div class="json-details">
                                 <div class="stats-panel">
@@ -129,26 +100,21 @@
         </section>
 
         <!-- Time Series Visualizer -->
-        <section id="timeseries-tool" class="tool-section" role="tabpanel" aria-labelledby="timeseries-tab" hidden>
+        <section id="timeseries-tool" class="tool-section" style="display: none;">
             <div class="tool-card">
                 <h2 class="tool-title">Time Series Visualizer</h2>
                 <div class="tool-content">
                     <div class="file-upload-container">
-                        <label class="file-drop-zone" for="timeseriesInput" role="button" tabindex="0">
-                            <svg class="upload-icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" aria-hidden="true">
+                        <label class="file-drop-zone" for="timeseriesInput">
+                            <svg class="upload-icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                 <path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z" />
                             </svg>
-                            <span class="upload-text" id="timeseriesUploadText">Select a time series data file</span>
-                            <input type="file" 
-                                   class="file-input" 
-                                   id="timeseriesInput" 
-                                   accept=".csv,.json"
-                                   aria-describedby="timeseriesUploadText" 
-                                   title="Choose time series data file" />
+                            <span class="upload-text">Select a time series data file</span>
+                            <input type="file" class="file-input" id="timeseriesInput" accept=".csv,.json" />
                         </label>
                     </div>
                     
-                    <div id="timeseries-results" class="results-container" aria-live="polite" hidden>
+                    <div id="timeseries-results" class="results-container" style="display: none;">
                         <div class="visualization-controls">
                             <div class="control-group">
                                 <label for="chartType">Chart Type:</label>
@@ -160,47 +126,34 @@
                             </div>
                             <div class="control-group">
                                 <label for="smoothing">Smoothing:</label>
-                                <input type="range" 
-                                       id="smoothing" 
-                                       min="0" 
-                                       max="100" 
-                                       value="0" 
-                                       class="range-input"
-                                       aria-label="Smoothing level" />
-                                <output for="smoothing" class="range-value">0%</output>
+                                <input type="range" id="smoothing" min="0" max="100" value="0" class="range-input">
+                                <span class="range-value">0%</span>
                             </div>
                             <div class="control-group">
                                 <label for="dateRange">Date Range:</label>
                                 <div class="date-range-inputs">
-                                    <input type="date" id="startDate" class="date-input" aria-label="Start date" />
-                                    <input type="date" id="endDate" class="date-input" aria-label="End date" />
+                                    <input type="date" id="startDate" class="date-input">
+                                    <input type="date" id="endDate" class="date-input">
                                 </div>
                             </div>
                             <div class="control-group options">
                                 <label class="checkbox-label">
-                                    <input type="checkbox" id="showTrend" checked />
+                                    <input type="checkbox" id="showTrend" checked>
                                     Show Trend
                                 </label>
                                 <label class="checkbox-label">
-                                    <input type="checkbox" id="showGrid" checked />
+                                    <input type="checkbox" id="showGrid" checked>
                                     Show Grid
                                 </label>
                                 <label class="checkbox-label">
-                                    <input type="checkbox" id="showAnnotations" checked />
+                                    <input type="checkbox" id="showAnnotations" checked>
                                     Show Annotations
                                 </label>
                             </div>
                         </div>
                         
                         <div class="chart-container">
-                            <canvas id="timeseriesChart" role="img" aria-label="Time series visualization"></canvas>
-                        </div>
-                        
-                        <div class="analysis-section">
-                            <h3 class="section-title">Analysis</h3>
-                            <div class="analysis-grid">
-                                <!-- Analysis cards will be dynamically populated -->
-                            </div>
+                            <canvas id="timeseriesChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -209,13 +162,17 @@
     </main>
 
     <!-- Scripts -->
-    <script type="module">
-        import { CSVController } from './src/tools/csv/controller.js?v=1.0.0';
-        import { JSONExplorer } from './src/tools/json/explorer.js?v=1.0.0';
-        import { TimeSeriesVisualizer } from './src/tools/timeseries/visualizer.js?v=1.0.0';
-        
-        // Initialize controllers when DOM is loaded
+    <script src="src/utils/navigation.js"></script>
+    <script src="src/tools/csv/analyzer.js"></script>
+    <script src="src/tools/csv/renderer.js"></script>
+    <script src="src/tools/csv/controller.js"></script>
+    <script src="src/tools/json/explorer.js"></script>
+    <script src="src/tools/timeseries/visualizer.js"></script>
+    
+    <script>
+        // Initialize everything when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
+            // Initialize controllers
             window.csvController = new CSVController();
             window.jsonExplorer = new JSONExplorer();
             window.timeSeriesVisualizer = new TimeSeriesVisualizer(
@@ -223,6 +180,5 @@
             );
         });
     </script>
-    <script src="src/utils/navigation.js?v=1.0.0"></script>
 </body>
 </html>
