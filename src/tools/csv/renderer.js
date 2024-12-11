@@ -1,6 +1,6 @@
 // src/tools/csv/renderer.js
 
-export class CSVRenderer {
+class CSVRenderer {
     constructor(summaryContainer, detailsContainer) {
         this.summaryContainer = document.getElementById(summaryContainer);
         this.detailsContainer = document.getElementById(detailsContainer);
