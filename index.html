@@ -127,17 +127,48 @@
                             <div class="control-group">
                                 <label for="smoothing">Smoothing:</label>
                                 <input type="range" id="smoothing" min="0" max="100" value="0" class="range-input">
+                                <span class="range-value">0%</span>
                             </div>
                             <div class="control-group">
+                                <label for="dateRange">Date Range:</label>
+                                <div class="date-range-inputs">
+                                    <input type="date" id="startDate" class="date-input">
+                                    <input type="date" id="endDate" class="date-input">
+                                </div>
+                            </div>
+                            <div class="control-group options">
                                 <label class="checkbox-label">
                                     <input type="checkbox" id="showTrend" checked>
                                     Show Trend
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="showGrid" checked>
+                                    Show Grid
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="showAnnotations" checked>
+                                    Show Annotations
                                 </label>
                             </div>
                         </div>
                         
                         <div class="chart-container">
                             <canvas id="timeseriesChart"></canvas>
+                            <div class="chart-toolbar">
+                                <button class="button button-small" id="addAnnotation">
+                                    <svg class="icon" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"/>
+                                    </svg>
+                                    Add Annotation
+                                </button>
+                                <button class="button button-small" id="exportChart">
+                                    <svg class="icon" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                    </svg>
+                                    Export
+                                </button>
+                            </div>
                         </div>
                         
                         <div class="analysis-section">
@@ -145,15 +176,36 @@
                             <div class="analysis-grid">
                                 <div class="stat-card">
                                     <h4 class="stat-title">Trend Analysis</h4>
-                                    <div id="trendAnalysis"></div>
+                                    <div id="trendAnalysis" class="stat-content">
+                                        <div class="trend-direction"></div>
+                                        <div class="trend-strength"></div>
+                                    </div>
                                 </div>
                                 <div class="stat-card">
                                     <h4 class="stat-title">Seasonality</h4>
-                                    <div id="seasonalityAnalysis"></div>
+                                    <div id="seasonalityAnalysis" class="stat-content">
+                                        <div class="seasonality-status"></div>
+                                        <div class="seasonality-period"></div>
+                                    </div>
                                 </div>
                                 <div class="stat-card">
                                     <h4 class="stat-title">Summary Statistics</h4>
-                                    <div id="timeseriesStats"></div>
+                                    <div id="timeseriesStats" class="stat-content">
+                                        <div class="stats-grid">
+                                            <div class="stat-item">
+                                                <span class="stat-label">Mean</span>
+                                                <span class="stat-value mean"></span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <span class="stat-label">Min</span>
+                                                <span class="stat-value min"></span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <span class="stat-label">Max</span>
+                                                <span class="stat-value max"></span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -164,9 +216,12 @@
     </main>
 
     <!-- Scripts -->
-    <script src="src/tools/csv/analyzer.js"></script>
-    <script src="src/tools/json/explorer.js"></script>
-    <script src="src/tools/timeseries/visualizer.js"></script>
+    <script type="module">
+        import { JSONExplorer } from './src/tools/json/explorer.js';
+        import { TimeSeriesVisualizer } from './src/tools/timeseries/visualizer.js';
+        window.JSONExplorer = JSONExplorer;
+        window.TimeSeriesVisualizer = TimeSeriesVisualizer;
+    </script>
     <script src="src/utils/navigation.js"></script>
 </body>
 </html>
